@@ -39,14 +39,14 @@ BENCHMARKS=${BENCHMARKS:-"tpch_mem clickbench_partitioned clickbench_extended"}
 CARGO_COMMAND="cargo run --release"
 
 ######
-# Fetch and checkout the remote branch in arrow-datafusion2
+# Fetch and checkout the remote branch in datafusion-pr
 ######
 
-pushd ~/arrow-datafusion2
+pushd ~/datafusion-pr
 git reset --hard
-git fetch -p apache
+git fetch -p origin
 gh pr checkout -f $PR
-MERGE_BASE=`git merge-base HEAD apache/main`
+MERGE_BASE=`git merge-base HEAD origin/main`
 BRANCH_BASE=`git rev-parse HEAD`
 BRANCH_NAME=`git rev-parse --abbrev-ref HEAD`
 
@@ -61,9 +61,9 @@ popd
 # in arrow-datafusion3
 ######
 
-pushd ~/arrow-datafusion3
+pushd ~/datafusion-main
 git reset --hard
-git fetch -p apache
+git fetch -p origin
 git checkout $MERGE_BASE
 
 cd benchmarks
@@ -79,7 +79,8 @@ Comparing $BRANCH_NAME ($BRANCH_BASE) to $MERGE_BASE [diff](https://github.com/a
 Results will be posted here when complete
 EOL
 # Post the comment to the ticket
-gh pr comment -F /tmp/comment.txt $PR
+# gh pr comment -F /tmp/comment.txt $PR
+cat /tmp/comment.txt
 
 echo "------------------"
 echo "Wait for background pre-compilation to complete..."
@@ -91,13 +92,13 @@ echo "DONE"
 ######
 # run the benchmark (from the arrow-datafusion directory
 ######
-pushd ~/arrow-datafusion
+pushd ~/datafusion
 git reset --hard
 git checkout main
 git pull
 cd benchmarks
 
-# clear old results
+clear old results
 rm -rf results/*
 
 
@@ -106,11 +107,11 @@ for bench in $BENCHMARKS ; do
     # Temp don't do this for cancellation benchmark
     ./bench.sh data $bench || true
     echo "** Running $bench baseline (merge-base from main)... **"
-    export DATAFUSION_DIR=~/arrow-datafusion3
+    export DATAFUSION_DIR=~/datafusion-main
     ./bench.sh run $bench
     ## Run against branch
     echo "** Running $bench branch... **"
-    export DATAFUSION_DIR=~/arrow-datafusion2
+    export DATAFUSION_DIR=~/datafusion
     ./bench.sh run $bench
 
 done
@@ -138,4 +139,5 @@ $REPORT
 </details>
 
 EOL
-gh pr comment -F /tmp/comment.txt $PR
+# gh pr comment -F /tmp/comment.txt $PR
+cat /tmp/comment.txt
