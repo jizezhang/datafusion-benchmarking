@@ -36,7 +36,7 @@ BENCHMARKS=${BENCHMARKS:-"tpch_mem clickbench_partitioned clickbench_extended"}
 
 
 ## Command used to pre-warm (aka precompile) the directories
-CARGO_COMMAND="cargo run --release"
+export CARGO_COMMAND="cargo run --release"
 
 ######
 # Fetch and checkout the remote branch in datafusion-pr
@@ -49,10 +49,8 @@ gh pr checkout -f $PR
 MERGE_BASE=`git merge-base HEAD origin/main`
 BRANCH_BASE=`git rev-parse HEAD`
 BRANCH_NAME=`git rev-parse --abbrev-ref HEAD`
-
-# start compiling the branch (in the background)
-cd benchmarks
-${CARGO_COMMAND} --bin dfbench >> build.log 2>&1 &
+cargo clean
+rm -rf benchmarks/results/*
 popd
 
 
@@ -65,9 +63,8 @@ pushd ~/datafusion-main
 git reset --hard
 git fetch -p origin
 git checkout $MERGE_BASE
-
-cd benchmarks
-${CARGO_COMMAND}  --bin dfbench  >> build.log 2>&1 &
+cargo clean
+rm -rf benchmarks/results/*
 popd
 
 # create comment saying the benchmarks are running
@@ -90,17 +87,17 @@ echo "DONE"
 
 
 ######
-# run the benchmark (from the arrow-datafusion directory
+# run the benchmark (from the datafusion directory
 ######
 pushd ~/datafusion
-git reset --hard
-git checkout main
-git pull
+# git reset --hard
+# git checkout main
+# git pull
+cargo clean
 cd benchmarks
 
-clear old results
+echo "clear old results"
 rm -rf results/*
-
 
 for bench in $BENCHMARKS ; do
     echo "** Creating data if needed **"
@@ -111,7 +108,7 @@ for bench in $BENCHMARKS ; do
     ./bench.sh run $bench
     ## Run against branch
     echo "** Running $bench branch... **"
-    export DATAFUSION_DIR=~/datafusion
+    export DATAFUSION_DIR=~/datafusion-pr
     ./bench.sh run $bench
 
 done
