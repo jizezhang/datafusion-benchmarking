@@ -51,7 +51,13 @@ ALLOWED_BENCHMARKS_DF = {
     "clickbench_1",
     "clickbench_pushdown",
 }
-ALLOWED_CRITERION_BENCHMARKS_DF = {"sql_planner", "case_when"}
+ALLOWED_CRITERION_BENCHMARKS_DF = {
+    "sql_planner",
+    "in_list",
+    "case_when",
+    "aggregate_vectorized",
+    "aggregate_query_sql",
+}
 ALLOWED_CRITERION_BENCHMARKS_ARROW = {
     "arrow_reader",
     "arrow_reader_clickbench",
